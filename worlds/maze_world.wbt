@@ -1,0 +1,106 @@
+#VRML_SIM R2023b utf8
+# Maze world - the e-puck learns to navigate from the bottom-left cell to
+# the goal in the top-right cell (three dead-end branches punish greed).
+# Tip: raise MAX_STEPS in qlearning_agent.py (e.g. 1500) for this world.
+# Swap in the DQN by changing the controller line + args if you like.
+
+WorldInfo {
+  basicTimeStep 16
+}
+Viewpoint {
+  orientation 1 0 0 -1.05
+  position 0 5.5 4
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 4.5 4.5
+  wallHeight 0.1
+}
+
+# --- maze walls (H = along x, V = along z) ---
+Solid {
+  translation -1.5 0.05 -0.75
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.45 0.33 0.22
+      }
+      geometry DEF H_BOX Box {
+        size 1.5 0.1 0.06
+      }
+    }
+  ]
+  boundingObject USE H_BOX
+}
+Solid {
+  translation 1.5 0.05 -0.75
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.45 0.33 0.22
+      }
+      geometry USE H_BOX
+    }
+  ]
+  boundingObject USE H_BOX
+}
+Solid {
+  translation -0.75 0.05 1.5
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.45 0.33 0.22
+      }
+      geometry DEF V_BOX Box {
+        size 0.06 0.1 1.5
+      }
+    }
+  ]
+  boundingObject USE V_BOX
+}
+Solid {
+  translation 0.75 0.05 1.5
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.45 0.33 0.22
+      }
+      geometry USE V_BOX
+    }
+  ]
+  boundingObject USE V_BOX
+}
+
+# --- goal (cell C, centre at 1.5, 1.5) ---
+Solid {
+  translation 1.5 0.004 1.5
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.85 0.1
+        emissiveColor 0.4 0.34 0.04
+        transparency 0.5
+      }
+      geometry Cylinder {
+        height 0.008
+        radius 0.15
+      }
+    }
+  ]
+}
+
+# --- learner (starts in cell G, facing cell H) ---
+DEF MAZE_ROBOT E-puck {
+  translation -1.5 0.03 -1.5
+  rotation 0 1 0 1.5708
+  name "maze_robot"
+  supervisor TRUE
+  controller "qlearning_agent"
+  controllerArgs [
+    "--goal=1.5,1.5"
+    "--qtable=qtable_maze.json"
+  ]
+}

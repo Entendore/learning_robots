@@ -1,0 +1,202 @@
+#VRML_SIM R2023b utf8
+# Learning Robots - three e-pucks learn to reach their goal markers with
+# tabular Q-learning (qlearning_agent v1.2).
+#   --share      count-weighted team learning over the e-puck radio
+#   --telemetry  live stats+Q-table for the Q_MONITOR robot (q_visualizer)
+# Delete controllers/qlearning_agent/qtable_robot*.json to learn from scratch.
+
+WorldInfo {
+  basicTimeStep 16
+}
+Viewpoint {
+  orientation 1 0 0 -0.785
+  position 0 3.2 3.2
+  follow "ROBOT1"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 4.5 4.5
+  wallHeight 0.1
+}
+
+# ----- static obstacles -----
+Solid {
+  translation 0 0.05 -0.9
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.5 0.5 0.55
+      }
+      geometry DEF BOX_A Box {
+        size 1.2 0.1 0.1
+      }
+    }
+  ]
+  boundingObject USE BOX_A
+}
+Solid {
+  translation -0.9 0.05 0.3
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.5 0.5 0.55
+      }
+      geometry DEF BOX_B Box {
+        size 0.1 0.1 1.2
+      }
+    }
+  ]
+  boundingObject USE BOX_B
+}
+Solid {
+  translation 0.7 0.075 0.3
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.35 0.55 0.75
+      }
+      geometry DEF CYL_A Cylinder {
+        height 0.15
+        radius 0.15
+      }
+    }
+  ]
+  boundingObject USE CYL_A
+}
+Solid {
+  translation -0.2 0.075 -0.25
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.35 0.55 0.75
+      }
+      geometry DEF CYL_B Cylinder {
+        height 0.15
+        radius 0.1
+      }
+    }
+  ]
+  boundingObject USE CYL_B
+}
+
+# ----- goal markers -----
+DEF GOAL1 Solid {
+  translation 1.2 0.004 1.2
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.85 0.1
+        emissiveColor 0.4 0.34 0.04
+        transparency 0.5
+      }
+      geometry Cylinder {
+        height 0.008
+        radius 0.15
+      }
+    }
+  ]
+}
+DEF GOAL2 Solid {
+  translation -1.2 0.004 1.2
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.2 0.15
+        emissiveColor 0.4 0.08 0.06
+        transparency 0.5
+      }
+      geometry Cylinder {
+        height 0.008
+        radius 0.15
+      }
+    }
+  ]
+}
+DEF GOAL3 Solid {
+  translation 0 0.004 -1.3
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.1 0.8 0.9
+        emissiveColor 0.04 0.32 0.36
+        transparency 0.5
+      }
+      geometry Cylinder {
+        height 0.008
+        radius 0.15
+      }
+    }
+  ]
+}
+
+# ----- learners -----
+DEF ROBOT1 E-puck {
+  translation -1.5 0.03 -1.5
+  rotation 0 1 0 0.6
+  name "robot1"
+  supervisor TRUE
+  controller "qlearning_agent"
+  controllerArgs [
+    "--goal=1.2,1.2"
+    "--qtable=qtable_robot1.json"
+    "--share"
+    "--telemetry"
+  ]
+}
+DEF ROBOT2 E-puck {
+  translation 1.5 0.03 -1.2
+  rotation 0 1 0 2.4
+  name "robot2"
+  supervisor TRUE
+  controller "qlearning_agent"
+  controllerArgs [
+    "--goal=-1.2,1.2"
+    "--qtable=qtable_robot2.json"
+    "--share"
+    "--telemetry"
+  ]
+}
+DEF ROBOT3 E-puck {
+  translation 0 0.03 1.8
+  rotation 0 1 0 3.6
+  name "robot3"
+  supervisor TRUE
+  controller "qlearning_agent"
+  controllerArgs [
+    "--goal=0,-1.3"
+    "--qtable=qtable_robot3.json"
+    "--share"
+    "--telemetry"
+  ]
+}
+
+# ----- live Q-table monitor (double-click it to open its Display) -----
+DEF Q_MONITOR Robot {
+  translation 2.0 0.05 2.0
+  rotation 0 1 0 -2.36
+  name "q_monitor"
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.1 0.1 0.12
+      }
+      geometry Box {
+        size 0.12 0.1 0.12
+      }
+    }
+    Display {
+      width 500
+      height 272
+    }
+    Receiver {
+      channel 1
+    }
+  ]
+  boundingObject Box {
+    size 0.12 0.1 0.12
+  }
+  controller "q_visualizer"
+}
